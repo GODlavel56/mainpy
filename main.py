@@ -16,10 +16,11 @@ except (KeyError, ValueError) as e:
 STAY_ALIVE_INTERVAL = random.randint(25 * 60, 35 * 60) 
 RECONNECT_DELAY = 15
 
-client = discord.Client()
+# *****************************************************************
+# *** DEĞİŞİKLİK BURADA: Üye listesi çekmeyi devre dışı bırakıyoruz ***
+client = discord.Client(guild_subscriptions=False, fetch_members=False)
+# *****************************************************************
 voice_client = None
-
-# --- ANA FONKSİYONLAR ---
 
 async def join_voice_channel():
     global voice_client
@@ -68,11 +69,10 @@ async def daily_restart():
     print("♻️ 24 saatlik çalışma süresi doldu. Stabilite için yeniden başlatılıyor...")
     sys.exit(0)
 
-# --- OLAY (EVENT) YÖNETİCİLERİ ---
-
 @client.event
 async def on_ready():
     print(f'✅ {client.user.name} olarak giriş yapıldı!')
+    
     await join_voice_channel()
     client.loop.create_task(stay_active())
     client.loop.create_task(daily_restart())
@@ -86,12 +86,7 @@ async def on_voice_state_update(member, before, after):
         await asyncio.sleep(RECONNECT_DELAY)
         await join_voice_channel()
 
-# --- BAŞLATMA ---
-
 try:
-    # ******************************************************
-    # *** DEĞİŞİKLİK BURADA: 'bot=False' PARAMETRESİ KALDIRILDI ***
     client.run(TOKEN)
-    # ******************************************************
 except Exception as e:
     print(f"❌ Giriş yapılamadı! Token geçersiz veya Discord'dan bir hata alındı: {e}")
