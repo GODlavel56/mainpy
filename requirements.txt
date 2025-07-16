@@ -1,2 +1,2 @@
-selfcord.py
+discord.py-self
 flask
