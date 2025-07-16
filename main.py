@@ -1,42 +1,44 @@
-import discum
+import discord
 import os
 from keep_alive import keep_alive
-import time
+import asyncio
 
+# Ortam değişkenlerini alıyoruz
 TOKEN = os.environ['TOKEN']
-GUILD_ID = os.environ['GUILD_ID']
-VOICE_CHANNEL_ID = os.environ['VOICE_CHANNEL_ID']
+# GUILD_ID bu kütüphanede doğrudan kullanılmıyor ama kontrol için kalabilir.
+# GUILD_ID = os.environ['GUILD_ID'] 
+VOICE_CHANNEL_ID = int(os.environ['VOICE_CHANNEL_ID']) # Kanal ID'sini integer yapmalıyız
 
-# discum Client ayarları
-bot = discum.Client(
-    token=TOKEN,
-    log=True,
-    build_num=280800,
-    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
-)
+# Client'ı oluşturuyoruz
+client = discord.Client()
 
-# Ses kanalına katılmak için yeni bir fonksiyon deniyoruz
-def join_voice_channel():
-    print("\n[!] Ses kanalına katılma fonksiyonu çalıştırıldı.")
+@client.event
+async def on_ready():
+    print(f'[✓] {client.user} olarak başarıyla giriş yapıldı.')
+    print(f'[!] Ses kanalına bağlanılıyor: {VOICE_CHANNEL_ID}')
+    
     try:
-        # Kütüphanenin kendi joinVoiceChannel fonksiyonunu kullanıyoruz
-        bot.gateway.joinVoiceChannel(GUILD_ID, VOICE_CHANNEL_ID, self_deaf=True)
-        print("[✓] Ses kanalına katılma isteği BAŞARIYLA gönderildi.")
+        # ID'sini verdiğimiz ses kanalını buluyoruz
+        channel = client.get_channel(VOICE_CHANNEL_ID)
+        
+        if channel and isinstance(channel, discord.VoiceChannel):
+            # Ses kanalına bağlanıyoruz
+            await channel.connect()
+            print(f'[✓] "{channel.name}" adlı ses kanalına başarıyla bağlanıldı.')
+        else:
+            print(f'[X] HATA: {VOICE_CHANNEL_ID} ID\'li bir ses kanalı bulunamadı veya bu bir ses kanalı değil.')
+            
     except Exception as e:
-        print(f"[X] HATA: Ses kanalına katılma sırasında bir sorun oluştu: {e}")
+        print(f'[X] HATA: Ses kanalına bağlanırken bir sorun oluştu: {e}')
 
-@bot.gateway.command
-def on_ready(resp):
-    if resp.event.ready:
-        print("\n[✓] Gateway'de 'READY' olayı başarıyla alındı. Hesap online.")
-        bot.gateway.removeCommand(on_ready)
-        
-        # Fonksiyonu çağırmadan önce kısa bir bekleme süresi ekleyelim
-        time.sleep(3)
-        
-        join_voice_channel()
-
-print("[!] Script başlatıldı, keep_alive ayarlanıyor...")
+# Sunucuyu canlı tutmak için keep_alive fonksiyonunu çalıştır
 keep_alive()
-print("[!] Gateway çalıştırılıyor ve Discord'a bağlanılıyor...")
-bot.gateway.run()
+
+try:
+    # Botu çalıştırıyoruz.
+    # bot=False parametresi, bunun bir kullanıcı tokeni olduğunu belirtir. BU ÇOK ÖNEMLİ!
+    client.run(TOKEN, bot=False)
+except discord.errors.LoginFailure:
+    print("[X] HATA: Geçersiz bir token girildi. Lütfen Render'daki TOKEN değişkenini kontrol edin.")
+except Exception as e:
+    print(f"[X] HATA: Bot çalıştırılırken beklenmedik bir hata oluştu: {e}")
