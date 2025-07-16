@@ -24,9 +24,15 @@ def keep_alive():
 TOKEN = os.environ['TOKEN']
 VOICE_CHANNEL_ID = int(os.environ['VOICE_CHANNEL_ID'])
 
-# BU SATIR, TÜM SORUNU ÇÖZECEK OLAN DEĞİŞİKLİKTİR
-# Kütüphanenin üye listesini çekmesini engelleyerek Discord'un güvenlik önlemini aşıyoruz.
-client = discord.Client(guild_subscriptions=False)
+# --- YENİ VE KESİN ÇÖZÜM ---
+# Sadece temel ve ses durumu için gerekli "Niyetleri" (Intents) belirtiyoruz.
+# Bu, kütüphanenin gereksiz üye listesi gibi verileri istemesini engeller.
+intents = discord.Intents.default()
+intents.voice_states = True
+
+# Client'ı bu özel niyetlerle başlatıyoruz.
+client = discord.Client(intents=intents)
+
 
 @client.event
 async def on_ready():
