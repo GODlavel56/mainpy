@@ -1,6 +1,5 @@
-import discord
+import discum
 import os
-import asyncio
 from flask import Flask
 from threading import Thread
 
@@ -20,43 +19,42 @@ def keep_alive():
 # --- Sunucu Kodu Bitişi ---
 
 
-# --- Discord Bot Kodu ---
+# --- discum Bot Kodu ---
 TOKEN = os.environ['TOKEN']
+GUILD_ID = int(os.environ['GUILD_ID'])
 VOICE_CHANNEL_ID = int(os.environ['VOICE_CHANNEL_ID'])
 
-# --- YENİ VE KESİN ÇÖZÜM ---
-# Sadece temel ve ses durumu için gerekli "Niyetleri" (Intents) belirtiyoruz.
-# Bu, kütüphanenin gereksiz üye listesi gibi verileri istemesini engeller.
-intents = discord.Intents.default()
-intents.voice_states = True
 
-# Client'ı bu özel niyetlerle başlatıyoruz.
-client = discord.Client(intents=intents)
+bot = discum.Client(
+    token=TOKEN,
+    log=True,
+    build_num=280800,
+    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
+)
 
-
-@client.event
-async def on_ready():
-    print(f'[✓] {client.user} olarak başarıyla giriş yapıldı.')
-    print(f'[!] Ses kanalına bağlanılıyor: {VOICE_CHANNEL_ID}')
-    
-    try:
-        channel = client.get_channel(VOICE_CHANNEL_ID)
+@bot.gateway.command
+def on_ready(resp):
+    if resp.event.ready:
+        print("[✓] Gateway'e bağlanıldı ve READY olayı alındı.")
+        bot.gateway.removeCommand(on_ready)
         
-        if channel and isinstance(channel, discord.VoiceChannel):
-            await channel.connect()
-            print(f'[✓] "{channel.name}" adlı ses kanalına başarıyla bağlanıldı.')
-        else:
-            print(f'[X] HATA: {VOICE_CHANNEL_ID} ID\'li bir ses kanalı bulunamadı veya bu bir ses kanalı değil.')
-            
-    except Exception as e:
-        print(f'[X] HATA: Ses kanalına bağlanırken bir sorun oluştu: {e}')
+        # --- YENİ VE KESİN YÖNTEM: Komutu manuel olarak hazırlıyoruz ---
+        # Bu, Discord'un ses durumu güncelleme komutudur (Opcode 4).
+        payload = {
+            "op": 4,
+            "d": {
+                "guild_id": GUILD_ID,
+                "channel_id": VOICE_CHANNEL_ID,
+                "self_mute": True,
+                "self_deaf": True,
+            }
+        }
+        
+        # Hazırladığımız komutu doğrudan gateway'e gönderiyoruz.
+        bot.gateway.send(payload)
+        print(f"[✓] Ses kanalına ({VOICE_CHANNEL_ID}) katılma isteği doğrudan gönderildi.")
 
-# Sunucuyu ve botu başlat
+# Projeyi başlat
 keep_alive()
-
-try:
-    client.run(TOKEN)
-except discord.errors.LoginFailure:
-    print("[X] HATA: Geçersiz bir token girildi. Lütfen Render'daki TOKEN değişkenini kontrol edin.")
-except Exception as e:
-    print(f"[X] HATA: Bot çalıştırılırken beklenmedik bir hata oluştu: {e}")
+print("[!] discum botu başlatılıyor...")
+bot.gateway.run(auto_reconnect=True)
