@@ -24,7 +24,8 @@ def keep_alive():
 TOKEN = os.environ['TOKEN']
 VOICE_CHANNEL_ID = int(os.environ['VOICE_CHANNEL_ID'])
 
-client = discord.Client()
+# SON DÜZELTME: Üye listesi taramasını kapatarak Discord'un engellemesini aşıyoruz.
+client = discord.Client(guild_subscriptions=False)
 
 @client.event
 async def on_ready():
@@ -47,7 +48,6 @@ async def on_ready():
 keep_alive()
 
 try:
-    # Son düzeltme burada: bot=False parametresi kaldırıldı.
     client.run(TOKEN)
 except discord.errors.LoginFailure:
     print("[X] HATA: Geçersiz bir token girildi. Lütfen Render'daki TOKEN değişkenini kontrol edin.")
