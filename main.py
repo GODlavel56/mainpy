@@ -1,8 +1,26 @@
 import discord
 import os
-from keep_alive import keep_alive
 import asyncio
+from flask import Flask
+from threading import Thread
 
+# --- Keep Alive Sunucu Kodu ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot çalışıyor."
+
+def run():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+# --- Sunucu Kodu Bitişi ---
+
+
+# --- Discord Bot Kodu ---
 TOKEN = os.environ['TOKEN']
 VOICE_CHANNEL_ID = int(os.environ['VOICE_CHANNEL_ID'])
 
@@ -25,6 +43,7 @@ async def on_ready():
     except Exception as e:
         print(f'[X] HATA: Ses kanalına bağlanırken bir sorun oluştu: {e}')
 
+# Sunucuyu ve botu başlat
 keep_alive()
 
 try:
