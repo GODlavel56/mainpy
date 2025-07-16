@@ -30,16 +30,16 @@ client = discord.Client()
 async def on_ready():
     print(f'[✓] {client.user} olarak başarıyla giriş yapıldı.')
     print(f'[!] Ses kanalına bağlanılıyor: {VOICE_CHANNEL_ID}')
-
+    
     try:
         channel = client.get_channel(VOICE_CHANNEL_ID)
-
+        
         if channel and isinstance(channel, discord.VoiceChannel):
             await channel.connect()
             print(f'[✓] "{channel.name}" adlı ses kanalına başarıyla bağlanıldı.')
         else:
             print(f'[X] HATA: {VOICE_CHANNEL_ID} ID\'li bir ses kanalı bulunamadı veya bu bir ses kanalı değil.')
-
+            
     except Exception as e:
         print(f'[X] HATA: Ses kanalına bağlanırken bir sorun oluştu: {e}')
 
@@ -47,7 +47,8 @@ async def on_ready():
 keep_alive()
 
 try:
-    client.run(TOKEN, bot=False)
+    # Son düzeltme burada: bot=False parametresi kaldırıldı.
+    client.run(TOKEN)
 except discord.errors.LoginFailure:
     print("[X] HATA: Geçersiz bir token girildi. Lütfen Render'daki TOKEN değişkenini kontrol edin.")
 except Exception as e:
