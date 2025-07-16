@@ -24,7 +24,8 @@ def keep_alive():
 TOKEN = os.environ['TOKEN']
 VOICE_CHANNEL_ID = int(os.environ['VOICE_CHANNEL_ID'])
 
-# SON DÜZELTME: Üye listesi taramasını kapatarak Discord'un engellemesini aşıyoruz.
+# BU SATIR, TÜM SORUNU ÇÖZECEK OLAN DEĞİŞİKLİKTİR
+# Kütüphanenin üye listesini çekmesini engelleyerek Discord'un güvenlik önlemini aşıyoruz.
 client = discord.Client(guild_subscriptions=False)
 
 @client.event
