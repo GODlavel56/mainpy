@@ -1,23 +1,20 @@
-import discord
-import asyncio
+import discum
 import os
 from keep_alive import keep_alive
 
 TOKEN = os.environ['TOKEN']
-VOICE_CHANNEL_ID = int(os.environ['VOICE_CHANNEL_ID'])
+GUILD_ID = os.environ['GUILD_ID']
+VOICE_CHANNEL_ID = os.environ['VOICE_CHANNEL_ID']
 
-intents = discord.Intents.default()
-client = discord.Client(intents=intents)
+bot = discum.Client(token=TOKEN, log=True)
 
-@client.event
-async def on_ready():
-    print(f"[✓] Giriş yapıldı: {client.user}")
-    channel = client.get_channel(VOICE_CHANNEL_ID)
-    if channel and isinstance(channel, discord.VoiceChannel):
-        await channel.connect()
-        print("[✓] Ses kanalına bağlanıldı.")
-    else:
-        print("[!] Ses kanalı bulunamadı veya geçersiz.")
+@bot.gateway.command
+def on_ready(resp):
+    if resp.event.ready_supplemental:
+        print("[✓] Giriş yapıldı.")
+        bot.gateway.removeCommand(on_ready)
+        bot.sendVoiceState(GUILD_ID, VOICE_CHANNEL_ID)
+        print("[✓] Ses kanalına bağlanma isteği gönderildi.")
 
 keep_alive()
-client.run(TOKEN, bot=False)
+bot.gateway.run()
