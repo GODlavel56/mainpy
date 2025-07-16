@@ -1,29 +1,42 @@
 import discum
 import os
 from keep_alive import keep_alive
+import time
 
 TOKEN = os.environ['TOKEN']
 GUILD_ID = os.environ['GUILD_ID']
 VOICE_CHANNEL_ID = os.environ['VOICE_CHANNEL_ID']
 
-# Discord'un güncel sürüm bilgilerini manuel olarak ekliyoruz
+# discum Client ayarları
 bot = discum.Client(
     token=TOKEN,
     log=True,
-    # discum'un otomatik bulmaya çalıştığı sürüm numarasını elle giriyoruz.
-    # Bu numara zamanla eskiyebilir, hata alırsanız artırmayı deneyin.
-    build_num=280800, 
+    build_num=280800,
     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36"
 )
 
+# Ses kanalına katılmak için yeni bir fonksiyon deniyoruz
+def join_voice_channel():
+    print("\n[!] Ses kanalına katılma fonksiyonu çalıştırıldı.")
+    try:
+        # Kütüphanenin kendi joinVoiceChannel fonksiyonunu kullanıyoruz
+        bot.gateway.joinVoiceChannel(GUILD_ID, VOICE_CHANNEL_ID, self_deaf=True)
+        print("[✓] Ses kanalına katılma isteği BAŞARIYLA gönderildi.")
+    except Exception as e:
+        print(f"[X] HATA: Ses kanalına katılma sırasında bir sorun oluştu: {e}")
+
 @bot.gateway.command
 def on_ready(resp):
-    # 'ready_supplemental' yerine daha genel olan 'ready' olayını dinliyoruz
     if resp.event.ready:
-        print("[✓] Giriş yapıldı ve READY olayı alındı.")
+        print("\n[✓] Gateway'de 'READY' olayı başarıyla alındı. Hesap online.")
         bot.gateway.removeCommand(on_ready)
-        bot.sendVoiceState(GUILD_ID, VOICE_CHANNEL_ID, self_deaf=True) # Kendini sağırlaştırma eklendi
-        print(f"[✓] {GUILD_ID} sunucusundaki {VOICE_CHANNEL_ID} ses kanalına bağlanma isteği gönderildi.")
+        
+        # Fonksiyonu çağırmadan önce kısa bir bekleme süresi ekleyelim
+        time.sleep(3)
+        
+        join_voice_channel()
 
+print("[!] Script başlatıldı, keep_alive ayarlanıyor...")
 keep_alive()
+print("[!] Gateway çalıştırılıyor ve Discord'a bağlanılıyor...")
 bot.gateway.run()
