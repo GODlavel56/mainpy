@@ -18,6 +18,7 @@ RECONNECT_DELAY = 15
 
 # *****************************************************************
 # *** DEĞİŞİKLİK BURADA: Üye listesi çekmeyi devre dışı bırakıyoruz ***
+# Bu, botun başlangıçta takılıp kalmasını engeller.
 client = discord.Client(guild_subscriptions=False, fetch_members=False)
 # *****************************************************************
 voice_client = None
